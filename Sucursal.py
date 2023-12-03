@@ -12,9 +12,28 @@ class NodoSucursal:
     def main(self):
         # Establece una conexión con el Nodo Maestro en self.host y el puerto self.port
         self.miSocket.connect((self.host, self.port))
+        self.soyLasSucursal()
         while True:
-            # Obtiene un mensaje ingresado por el usuario
-            mensaje = str(input("Escribe un mensaje: "))
+            # Menu de opciones
+            print(f" Menú de sucursal {self.sucursal} ".center(100, "#"))
+            print("1. Comprar articulo")
+            print("2. Agregar articulo")
+            print("3. Consultar clientes")
+            print("4. Salir")
+            opcion = int(input("Opción: "))
+            
+            # Switch para afectar la variable mensaje según la opción seleccionada
+            if opcion == 1:
+                mensaje = "comprarArticulo"
+            elif opcion == 2:
+                mensaje = "agregarArticulo"
+            elif opcion == 3:
+                mensaje = "consultarCliente"
+            elif opcion == 4:
+                mensaje = "salir"
+            else:
+                print("Opción inválida. Intente nuevamente.")
+                continue
             
             # Se agrega un Try - Except, ya que se considera el caso en el que el Nodo Maestro se desconecta a midad
             # del proceso, así que es mejor tambien finalizar la actividad del cliente con el servidor.
@@ -26,9 +45,12 @@ class NodoSucursal:
                 respuesta = self.miSocket.recv(1024)
                 print(respuesta.decode('utf-8'))
 
+                if mensaje == "salir":
+                    print(f"Cerrando conexión con de esta sucursal")
+                    break
             # Cuando se interrumpe la comunicación con el Nodo Maestro, se finaliza la petición de más mensajes
             # y esto provoca que el programa al igual finalice de este lado
-            except ConnectionResetError as error:
+            except Exception as error:
                 print(f"Se interrumpio la conexión con el Nodo Maestro")
                 break
         self.miSocket.close()
@@ -41,7 +63,10 @@ class NodoSucursal:
         mensajeCompleto = f"[{tiempoProcesado}] {mensaje}"
         
         # Envia el mensaje al Nodo Maestro como bytes codificados en UTF-8
-        self.miSocket.send(mensajeCompleto.encode('utf-8'))
+        self.miSocket.send(mensaje.encode('utf-8'))
+    def soyLasSucursal(self):
+        # Envia el nombre de la sucursal al Nodo Maestro
+        self.miSocket.send(self.sucursal.encode('utf-8'))
 
-nuevaSucursal = NodoSucursal("192.168.100.5", 5001, "sucursal_CDMX")
+nuevaSucursal = NodoSucursal("192.168.100.5", 5000, "sucursal_CDMX")
 nuevaSucursal.main()
