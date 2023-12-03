@@ -18,7 +18,8 @@ class NodoMaestro:
         self.inventario = {}
         self.clientes = {}
         self.mutex = threading.Lock()
-        self.mensajes = {}
+        self.logsSucursalesDisponibles = {}
+        self.sucursalIP = {}
         pass
     
     def iniciarServidor(self):
@@ -39,16 +40,22 @@ class NodoMaestro:
         while True:
             try:
                 # Acepta una nueva conexión entrante y obtiene el socket del cliente y su dirección
-                socketCliente, ipCliente = socketServer.accept()
-                print(f"Nueva conexión con Sucursal con {ipCliente}")
+                socketCliente, ipSucursal = socketServer.accept()
+                print(f"Nueva conexión con Sucursal con {ipSucursal}")
 
                 #Inicia un subproceso para manejar al cliente
-                manejandoCliente = threading.Thread(target=self.atenderCliente, args=(socketCliente, ipCliente))
+                manejandoCliente = threading.Thread(target=self.atenderCliente, args=(socketCliente, ipSucursal))
                 manejandoCliente.start()
+                
             except:
                 print("Error de conexión con una sucursal")
 
-    def atenderCliente(self, socketCliente, ipCliente):
+    def atenderCliente(self, socketCliente, ipSucursal):
+        # Agregar la sucursal de la IP
+        suc = socketCliente.recv(1024)
+        suc = suc.decode('utf-8')
+        self.agregarSucursal(suc)
+        self.asignarIPaSucursal(suc, ipSucursal)
         while True:
             try:
                 # Recibe datos enviados por el cliente (hasta 1024 bytes)
@@ -65,31 +72,82 @@ class NodoMaestro:
                 marcaTiempo = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
                 # Muestra el mensaje del cliente junto con la marca  de tiempo y su dirección
-                print(f"Mensaje de {ipCliente} ({marcaTiempo}): {mensaje}")
+                print(f"Mensaje de {ipSucursal} ({marcaTiempo}): {mensaje}")
+                
+                # El mensaje, realiza una instrucción en el Nodo Maestro
+                self.procesarMensaje(mensaje,ipSucursal)
+                #Despues de cualquier acción, realizamos la distribución
+                self.distribuirAutomaticamente()
+
+                # Verifica si el mensaje indica que la conexión debe cerrarse
+                if mensaje == "salir":
+                    print(f"Cerrando conexión con {ipSucursal}")
+                    break
 
                 # Almacena el mensaje en el diccionario de mensajes
-                if ipCliente not in self.mensajes:    
-                    self.mensajes[ipCliente] = []
-                self.mensajes[ipCliente].append((marcaTiempo, mensaje))
-
+                if ipSucursal not in self.logsSucursalesDisponibles:    
+                    self.logsSucursalesDisponibles[ipSucursal] = []
+                self.logsSucursalesDisponibles[ipSucursal].append((marcaTiempo, mensaje))
                 # Envia una respuesta al cliente confirmado la recepción del mensaje
-                respuesta = f"Mensaje recibido de {ipCliente}"
+                respuesta = f"Mensaje recibido de {ipSucursal}"
                 socketCliente.send(respuesta.encode('utf-8'))
 
             except Exception as error:
                 #Si ocurre un error, se muestra en la consola y se sale del bucle
-                print(f"Error de conexión con {ipCliente}, ocurrio el error: {error}")
+                print(f"Ocurrio el error: {error}")
+                # Cuando se desconecta el cliente, dejará de ser considerado en la lista de sucursales 
+                self.seDesconectoUnaSucursal(ipSucursal)
                 break
+        # Cierra la conexión con el cliente al finalizar
+        socketCliente.close()
+    
+    def asignarIPaSucursal(self, nombreSucursal, IPSucursal):
+        self.sucursalIP[IPSucursal] = nombreSucursal
+
     def distribuirAutomaticamente(self):
+        for producto, cantidad in self.inventarioMaestro.items():
+            if len(self.inventario) != 0:
+                for sucursal in self.inventario:
+                    self.inventario[sucursal][producto] = 0
+        # Distribuye equitativamente el inventario del Nodo Maestro en los nodos existentes                    
+        for producto, cantidad in self.inventarioMaestro.items():
+            if len(self.inventario) != 0:
+                cantidad_por_sucursal = cantidad // len(self.inventario)
+                for sucursal in self.inventario:
+                    self.inventario[sucursal][producto] += cantidad_por_sucursal
+                self.inventario[sucursal][producto] += cantidad%len(self.inventario)
+        print(self.inventario)          
+    
+    def seDesconectoUnaSucursal(self,ipSucursal):
+        print(f"Se desconectó la sucursal {self.sucursalIP[ipSucursal]}")
+        self.logsSucursalesDisponibles.pop(ipSucursal)
+        self.sucursalIP.pop(ipSucursal)
+
+    def procesarMensaje(self, instruccionDeLaSucursal,ipSucursal):
+        if instruccionDeLaSucursal == "salir":
+            self.seDesconectoUnaSucursal(ipSucursal)
+        elif instruccionDeLaSucursal == "agregarArticulo":
+            self.agregarArticulo()
         pass
     
-    def procesarMensaje(self):
-        pass
-    
-    def agregarSucursal(self):
-        pass
+    def agregarSucursal(self, sucursal):
+        self.inventario[sucursal] = {
+            "Fritos": 0,
+                "Cheetos": 0,
+                "Doritos": 0,
+                "Ruffles": 0,
+                "Tostitos": 0,
+                "Sabritas Adobadas": 0,
+                "Rancheritos": 0,
+                "Chocoretas": 0,
+                "Sabritas": 0,
+        }
     
     def comprarArticulo(self):
+        pass
+    
+    def agregarArticulo(self):
+        print("Estamos dentro de agregarArticulo")
         pass
 
 nodoMaestro = NodoMaestro("192.168.100.5", 5000)
