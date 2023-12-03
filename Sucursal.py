@@ -25,6 +25,8 @@ class NodoSucursal:
             # Switch para afectar la variable mensaje según la opción seleccionada
             if opcion == 1:
                 mensaje = "comprarArticulo"
+                articulo = str(input("Que producto te gustaría comprar? Respuesta = "))
+                cantArt = str(input(f"Cuantos piezas compraras de {articulo}? Respuesta = "))
             elif opcion == 2:
                 mensaje = "agregarArticulo"
                 articulo = str(input("Agrega el nombre del articulo por ingresar: "))
@@ -44,15 +46,24 @@ class NodoSucursal:
                 # Llama al metodo 'enviarMensaje' para enviar el mensaje al Nodo Maestro
                 self.enviarMensaje(mensaje)
                 
+                if mensaje == "comprarArticulo":
+                    # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
+                    # sucursal correspondiente
+                    self.enviarMensaje(articulo)
+                    # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
+                    # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
+                    time.sleep(0.1)
+                    self.enviarMensaje(cantArt)
+                
                 if mensaje == "agregarArticulo":
                     # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
                     # sucursal correspondiente
                     self.enviarMensaje(articulo)
                     # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
-                    time.sleep(1)
+                    time.sleep(0.1)
                     self.enviarMensaje(cantArt)
-                    pass
+                
 
                 # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
                 respuesta = self.miSocket.recv(1024)

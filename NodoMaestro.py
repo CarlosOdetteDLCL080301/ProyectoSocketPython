@@ -100,6 +100,9 @@ class NodoMaestro:
                 break
         # Cierra la conexión con el cliente al finalizar
         socketCliente.close()
+        if not self.sucursalIP:
+            print("Ya no hay sucursales")
+            #Se agregara un metodo para finalizar el programa por completo
     
     def asignarIPaSucursal(self, nombreSucursal, IPSucursal):
         self.sucursalIP[IPSucursal] = nombreSucursal
@@ -116,7 +119,7 @@ class NodoMaestro:
                 for sucursal in self.inventario:
                     self.inventario[sucursal][producto] += cantidad_por_sucursal
                 self.inventario[sucursal][producto] += cantidad%len(self.inventario)
-        print(self.inventario)          
+        #print(self.inventario)            
     
     def seDesconectoUnaSucursal(self,ipSucursal):
         print(f"Se desconectó la sucursal {self.sucursalIP[ipSucursal]}")
@@ -128,7 +131,8 @@ class NodoMaestro:
             self.seDesconectoUnaSucursal(ipSucursal)
         elif instruccionDeLaSucursal == "agregarArticulo":
             self.agregarArticulo(socketCliente)
-        pass
+        elif instruccionDeLaSucursal == "comprarArticulo":
+            self.comprarArticulo(socketCliente)
     
     def agregarSucursal(self, sucursal):
         self.inventario[sucursal] = {
@@ -143,23 +147,38 @@ class NodoMaestro:
                 "Sabritas": 0,
         }
     
-    def comprarArticulo(self):
-        pass
+    def comprarArticulo(self,socketCliente):
+        articulo = socketCliente.recv(1024)
+        articulo = articulo.decode('utf-8')
+        cantArt = socketCliente.recv(1024)
+        cantArt = int(cantArt.decode('utf-8'))
+        self.mutex.acquire()
+        try:
+            if self.inventarioMaestro[articulo] - cantArt >= 0 and articulo in self.inventarioMaestro:
+                print(" Se compra lo siguiente ".center(100,"-"))
+                print(f"Articulo: {articulo}\tCantidad: {cantArt}")
+                self.inventarioMaestro[articulo] -= cantArt
+            else:
+                print(f"El articulo {articulo} no exite o no hay inventario suficiente")  
+        finally:
+            print(self.inventarioMaestro)
+            self.mutex.release()
     
     def agregarArticulo(self,socketCliente):
-        print("Estamos dentro de agregarArticulo")
         articulo = socketCliente.recv(1024)
-        print("A")
         articulo = articulo.decode('utf-8')
-        print(f"B {articulo}")
         cantArt = socketCliente.recv(1024)
-        print(f"C {cantArt}")
         cantArt = int(cantArt.decode('utf-8'))
+        print(" Se agrega al inventario lo siguiente ".center(100,"-"))
         print(f"Articulo: {articulo}\tCantidad: {cantArt}")
         self.mutex.acquire()
         try:
-            pass
+            if articulo in self.inventarioMaestro:
+                self.inventarioMaestro[articulo] += cantArt   
+            else:
+                self.inventarioMaestro[articulo] = cantArt
         finally:
+            print(self.inventarioMaestro)
             self.mutex.release()
 
 nodoMaestro = NodoMaestro("192.168.100.5", 5000)
