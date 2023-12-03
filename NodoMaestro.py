@@ -75,7 +75,7 @@ class NodoMaestro:
                 print(f"Mensaje de {ipSucursal} ({marcaTiempo}): {mensaje}")
                 
                 # El mensaje, realiza una instrucción en el Nodo Maestro
-                self.procesarMensaje(mensaje,ipSucursal)
+                self.procesarMensaje(mensaje,ipSucursal, socketCliente)
                 #Despues de cualquier acción, realizamos la distribución
                 self.distribuirAutomaticamente()
 
@@ -123,11 +123,11 @@ class NodoMaestro:
         self.logsSucursalesDisponibles.pop(ipSucursal)
         self.sucursalIP.pop(ipSucursal)
 
-    def procesarMensaje(self, instruccionDeLaSucursal,ipSucursal):
+    def procesarMensaje(self, instruccionDeLaSucursal,ipSucursal, socketCliente):
         if instruccionDeLaSucursal == "salir":
             self.seDesconectoUnaSucursal(ipSucursal)
         elif instruccionDeLaSucursal == "agregarArticulo":
-            self.agregarArticulo()
+            self.agregarArticulo(socketCliente)
         pass
     
     def agregarSucursal(self, sucursal):
@@ -146,9 +146,21 @@ class NodoMaestro:
     def comprarArticulo(self):
         pass
     
-    def agregarArticulo(self):
+    def agregarArticulo(self,socketCliente):
         print("Estamos dentro de agregarArticulo")
-        pass
+        articulo = socketCliente.recv(1024)
+        print("A")
+        articulo = articulo.decode('utf-8')
+        print(f"B {articulo}")
+        cantArt = socketCliente.recv(1024)
+        print(f"C {cantArt}")
+        cantArt = int(cantArt.decode('utf-8'))
+        print(f"Articulo: {articulo}\tCantidad: {cantArt}")
+        self.mutex.acquire()
+        try:
+            pass
+        finally:
+            self.mutex.release()
 
 nodoMaestro = NodoMaestro("192.168.100.5", 5000)
 nodoMaestro.iniciarServidor()

@@ -27,6 +27,8 @@ class NodoSucursal:
                 mensaje = "comprarArticulo"
             elif opcion == 2:
                 mensaje = "agregarArticulo"
+                articulo = str(input("Agrega el nombre del articulo por ingresar: "))
+                cantArt = str(input(f"Cuantos piezas agregaras de {articulo}? "))
             elif opcion == 3:
                 mensaje = "consultarCliente"
             elif opcion == 4:
@@ -38,9 +40,20 @@ class NodoSucursal:
             # Se agrega un Try - Except, ya que se considera el caso en el que el Nodo Maestro se desconecta a midad
             # del proceso, así que es mejor tambien finalizar la actividad del cliente con el servidor.
             try:
+
                 # Llama al metodo 'enviarMensaje' para enviar el mensaje al Nodo Maestro
                 self.enviarMensaje(mensaje)
                 
+                if mensaje == "agregarArticulo":
+                    # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
+                    # sucursal correspondiente
+                    self.enviarMensaje(articulo)
+                    # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
+                    # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
+                    time.sleep(1)
+                    self.enviarMensaje(cantArt)
+                    pass
+
                 # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
                 respuesta = self.miSocket.recv(1024)
                 print(respuesta.decode('utf-8'))
