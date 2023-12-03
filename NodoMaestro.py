@@ -20,6 +20,8 @@ class NodoMaestro:
         self.mutex = threading.Lock()
         self.logsSucursalesDisponibles = {}
         self.sucursalIP = {}
+        self.clientesYSusGuiasDeEnvio = {}
+        self.historialGuiaEnvio = {}
         pass
     
     def iniciarServidor(self):
@@ -102,6 +104,8 @@ class NodoMaestro:
         socketCliente.close()
         if not self.sucursalIP:
             print("Ya no hay sucursales")
+        else:
+           self.distribuirAutomaticamente() 
             #Se agregara un metodo para finalizar el programa por completo
     
     def asignarIPaSucursal(self, nombreSucursal, IPSucursal):
@@ -132,7 +136,7 @@ class NodoMaestro:
         elif instruccionDeLaSucursal == "agregarArticulo":
             self.agregarArticulo(socketCliente)
         elif instruccionDeLaSucursal == "comprarArticulo":
-            self.comprarArticulo(socketCliente)
+            self.comprarArticulo(socketCliente,ipSucursal)
     
     def agregarSucursal(self, sucursal):
         self.inventario[sucursal] = {
@@ -147,23 +151,39 @@ class NodoMaestro:
                 "Sabritas": 0,
         }
     
-    def comprarArticulo(self,socketCliente):
+    def comprarArticulo(self,socketCliente,ipSucursal):
         articulo = socketCliente.recv(1024)
         articulo = articulo.decode('utf-8')
         cantArt = socketCliente.recv(1024)
         cantArt = int(cantArt.decode('utf-8'))
+        usuario = socketCliente.recv(1024)
+        usuario = str(usuario.decode('utf-8'))
+        print(f"El usuario {usuario} quiere comprar {cantArt} piezas de {articulo}")
         self.mutex.acquire()
         try:
             if self.inventarioMaestro[articulo] - cantArt >= 0 and articulo in self.inventarioMaestro:
                 print(" Se compra lo siguiente ".center(100,"-"))
-                print(f"Articulo: {articulo}\tCantidad: {cantArt}")
+                compras = f"Articulo: {articulo}\tCantidad: {cantArt}"
+                print(compras)
                 self.inventarioMaestro[articulo] -= cantArt
+                idEnvio = f"{str(hash(articulo))[15:]}/{str(hash(usuario))[15:]}/{self.sucursalIP[ipSucursal]}/{usuario}"
+                self.cliente(usuario,idEnvio, compras)
             else:
                 print(f"El articulo {articulo} no exite o no hay inventario suficiente")  
         finally:
             print(self.inventarioMaestro)
             self.mutex.release()
     
+    def cliente(self,usuario,idEnvio, compras):
+        # Si no existe el usuario en el diccionario self.clientesYSusGuiasDeEnvio
+        # Se crea la llave con el usuario y se hara un registro de todos sus idEnvio
+        if usuario not in self.clientesYSusGuiasDeEnvio:
+            self.clientesYSusGuiasDeEnvio[usuario] = []
+        # Agregamos el idEnvio con su respectivo usuario
+        self.clientesYSusGuiasDeEnvio[usuario].append(idEnvio)
+        # Se crea un diccionario con el idEnvio y su respectivo estado
+        self.historialGuiaEnvio[idEnvio] = compras
+        
     def agregarArticulo(self,socketCliente):
         articulo = socketCliente.recv(1024)
         articulo = articulo.decode('utf-8')

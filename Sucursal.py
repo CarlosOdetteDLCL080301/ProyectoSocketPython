@@ -27,6 +27,7 @@ class NodoSucursal:
                 mensaje = "comprarArticulo"
                 articulo = str(input("Que producto te gustaría comprar? Respuesta = "))
                 cantArt = str(input(f"Cuantos piezas compraras de {articulo}? Respuesta = "))
+                usuarioCliente = str(input("Agrega tu usuario: "))
             elif opcion == 2:
                 mensaje = "agregarArticulo"
                 articulo = str(input("Agrega el nombre del articulo por ingresar: "))
@@ -54,7 +55,10 @@ class NodoSucursal:
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
                     time.sleep(0.1)
                     self.enviarMensaje(cantArt)
-                
+                    # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
+                    # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
+                    time.sleep(0.1)
+                    self.enviarMensaje(usuarioCliente)
                 if mensaje == "agregarArticulo":
                     # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
                     # sucursal correspondiente
