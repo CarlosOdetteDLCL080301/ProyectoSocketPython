@@ -137,6 +137,8 @@ class NodoMaestro:
             self.agregarArticulo(socketCliente)
         elif instruccionDeLaSucursal == "comprarArticulo":
             self.comprarArticulo(socketCliente,ipSucursal)
+        elif instruccionDeLaSucursal == "consultarCliente":
+            self.consultarClientes(socketCliente)
     
     def agregarSucursal(self, sucursal):
         self.inventario[sucursal] = {
@@ -158,7 +160,7 @@ class NodoMaestro:
         cantArt = int(cantArt.decode('utf-8'))
         usuario = socketCliente.recv(1024)
         usuario = str(usuario.decode('utf-8'))
-        print(f"El usuario {usuario} quiere comprar {cantArt} piezas de {articulo}")
+        print(f"El usuario {usuario} quiere comprar {cantArt} piezas de {articulo}".center(100,"❁"))
         self.mutex.acquire()
         try:
             if self.inventarioMaestro[articulo] - cantArt >= 0 and articulo in self.inventarioMaestro:
@@ -169,7 +171,7 @@ class NodoMaestro:
                 idEnvio = f"{str(hash(articulo))[15:]}/{str(hash(usuario))[15:]}/{self.sucursalIP[ipSucursal]}/{usuario}"
                 self.cliente(usuario,idEnvio, compras)
             else:
-                print(f"El articulo {articulo} no exite o no hay inventario suficiente")  
+                print(f"El articulo {articulo} no existe o no hay inventario suficiente")  
         finally:
             print(self.inventarioMaestro)
             self.mutex.release()
@@ -183,7 +185,13 @@ class NodoMaestro:
         self.clientesYSusGuiasDeEnvio[usuario].append(idEnvio)
         # Se crea un diccionario con el idEnvio y su respectivo estado
         self.historialGuiaEnvio[idEnvio] = compras
+        print(f"Historial de clientes: {self.clientesYSusGuiasDeEnvio}")
+        print(f"Historial de guía de envíos {self.historialGuiaEnvio}")
         
+    def consultarClientes(self, socketCliente):
+        # Se envía el diccionario de clientes
+        socketCliente.send(json.dumps(self.clientesYSusGuiasDeEnvio).encode('utf-8'))
+
     def agregarArticulo(self,socketCliente):
         articulo = socketCliente.recv(1024)
         articulo = articulo.decode('utf-8')
