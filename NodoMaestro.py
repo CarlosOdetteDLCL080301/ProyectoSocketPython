@@ -91,6 +91,7 @@ class NodoMaestro:
                     self.logsSucursalesDisponibles[ipSucursal] = []
                 self.logsSucursalesDisponibles[ipSucursal].append((marcaTiempo, mensaje))
                 # Envia una respuesta al cliente confirmado la recepción del mensaje
+                time.sleep(0.1) 
                 respuesta = f"Mensaje recibido de {ipSucursal}"
                 socketCliente.send(respuesta.encode('utf-8'))
 

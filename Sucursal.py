@@ -19,7 +19,7 @@ class NodoSucursal:
             print("1. Comprar articulo")
             print("2. Agregar articulo")
             print("3. Consultar clientes")
-            print("4. Salir")
+            print("9. Salir")
             opcion = int(input("Opción: "))
             
             # Switch para afectar la variable mensaje según la opción seleccionada
@@ -34,7 +34,7 @@ class NodoSucursal:
                 cantArt = str(input(f"Cuantos piezas agregaras de {articulo}? "))
             elif opcion == 3:
                 mensaje = "consultarCliente"
-            elif opcion == 4:
+            elif opcion == 9:
                 mensaje = "salir"
             else:
                 print("Opción inválida. Intente nuevamente.")
@@ -67,7 +67,25 @@ class NodoSucursal:
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
                     time.sleep(0.1)
                     self.enviarMensaje(cantArt)
-                
+                if mensaje == "consultarCliente":
+                    # Se recibirá un diccionario que nos enviará el nodo maestro
+                    # Aqui recibiremos el diccionario
+                    # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
+                    # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando
+                    time.sleep(0.1)
+                    # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
+                    respuesta = self.miSocket.recv(1024)
+                    # # Se decodifica la respuesta y se convierte a un diccionario
+                    respuesta = respuesta.decode('utf-8')
+                    respuesta = json.loads(respuesta)
+                    # # Se imprime el diccionario
+                    print(" USUARIOS ".center(50,"-"))
+                    for unUsuario in respuesta:
+                        print(f"--> {unUsuario}")
+                    # # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
+                    # # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando
+                    time.sleep(0.1) 
+                    pass
 
                 # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
                 respuesta = self.miSocket.recv(1024)
