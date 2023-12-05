@@ -85,16 +85,14 @@ class NodoMaestro:
                 if mensaje == "salir":
                     print(f"Cerrando conexión con {ipSucursal}")
                     break
-
                 # Almacena el mensaje en el diccionario de mensajes
                 if ipSucursal not in self.logsSucursalesDisponibles:    
                     self.logsSucursalesDisponibles[ipSucursal] = []
                 self.logsSucursalesDisponibles[ipSucursal].append((marcaTiempo, mensaje))
                 # Envia una respuesta al cliente confirmado la recepción del mensaje
-                time.sleep(0.1) 
+                time.sleep(0.2) 
                 respuesta = f"Mensaje recibido de {ipSucursal}"
                 socketCliente.send(respuesta.encode('utf-8'))
-
             except Exception as error:
                 #Si ocurre un error, se muestra en la consola y se sale del bucle
                 print(f"Ocurrio el error: {error}")
