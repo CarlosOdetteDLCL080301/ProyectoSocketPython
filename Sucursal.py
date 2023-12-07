@@ -1,5 +1,4 @@
 import socket,json,time
-import pandas as pd
 
 class NodoSucursal:
     # Inicializa la sucursal con la dirección, puerto y nombre de la sucursal especificada

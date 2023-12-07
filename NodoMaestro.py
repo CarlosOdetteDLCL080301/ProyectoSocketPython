@@ -1,4 +1,4 @@
-import socket, json, threading, random, time, pandas
+import socket, json, threading, random, time
 class NodoMaestro:
     def __init__(self, host, port):
         self.host = host
