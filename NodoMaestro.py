@@ -92,7 +92,7 @@ class NodoMaestro:
                 self.logsSucursalesDisponibles[ipSucursal].append((marcaTiempo, mensaje))
                 # Envia una respuesta al cliente confirmado la recepción del mensaje
                 time.sleep(0.2) 
-                respuesta = f"Mensaje recibido de {ipSucursal}"
+                respuesta = f" Se logra comunicación con el Nodo Maestro ".center(100,"~")
                 socketCliente.send(respuesta.encode('utf-8'))
             except Exception as error:
                 #Si ocurre un error, se muestra en la consola y se sale del bucle
@@ -190,8 +190,12 @@ class NodoMaestro:
         self.clientesYSusGuiasDeEnvio[usuario].append(idEnvio)
         # Se crea un diccionario con el idEnvio y su respectivo estado
         self.historialGuiaEnvio[idEnvio] = compras
-        print(f"Historial de clientes: {self.clientesYSusGuiasDeEnvio}")
-        print(f"Historial de guía de envíos {self.historialGuiaEnvio}")
+        print(f" Historial de clientes ".center(100,"^"))
+        for num, clientes in enumerate(self.clientesYSusGuiasDeEnvio.keys(),start=1):
+            print(f"{num}.- {clientes}")
+        print(f" Historial de guía de envíos ".center(100,"Y"))
+        for num, guia in enumerate(self.historialGuiaEnvio.keys(),start=1):
+            print(f"{num}.- {guia}")
         
     def consultarClientes(self, socketCliente):
         # Se envía el diccionario de clientes
