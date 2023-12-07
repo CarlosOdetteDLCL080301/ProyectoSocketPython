@@ -1,4 +1,4 @@
-import socket, json, threading, random, time
+import socket, json, threading, random, time, pandas
 class NodoMaestro:
     def __init__(self, host, port):
         self.host = host
@@ -75,7 +75,8 @@ class NodoMaestro:
 
                 # Muestra el mensaje del cliente junto con la marca  de tiempo y su dirección
                 print(f"Mensaje de {ipSucursal} ({marcaTiempo}): {mensaje}")
-                
+                #Realizamos la distribución
+                self.distribuirAutomaticamente()
                 # El mensaje, realiza una instrucción en el Nodo Maestro
                 self.procesarMensaje(mensaje,ipSucursal, socketCliente)
                 #Despues de cualquier acción, realizamos la distribución
@@ -153,6 +154,8 @@ class NodoMaestro:
         }
     
     def comprarArticulo(self,socketCliente,ipSucursal):
+        socketCliente.send(json.dumps(self.inventario).encode('utf-8'))
+        time.sleep(0.1)
         articulo = socketCliente.recv(1024)
         articulo = articulo.decode('utf-8')
         cantArt = socketCliente.recv(1024)
@@ -162,17 +165,20 @@ class NodoMaestro:
         print(f"El usuario {usuario} quiere comprar {cantArt} piezas de {articulo}".center(100,"❁"))
         self.mutex.acquire()
         try:
-            if self.inventarioMaestro[articulo] - cantArt >= 0 and articulo in self.inventarioMaestro:
+            if articulo in self.inventarioMaestro and self.inventarioMaestro[articulo] - cantArt >= 0:
                 print(" Se compra lo siguiente ".center(100,"-"))
                 compras = f"Articulo: {articulo}\tCantidad: {cantArt}"
                 print(compras)
                 self.inventarioMaestro[articulo] -= cantArt
                 idEnvio = f"{str(hash(articulo))[15:]}/{str(hash(usuario))[15:]}/{self.sucursalIP[ipSucursal]}/{usuario}"
                 self.cliente(usuario,idEnvio, compras)
+                mensajes = f"Se compró correctamente {compras}"
             else:
-                print(f"El articulo {articulo} no existe o no hay inventario suficiente")  
+                mensajes = f"El articulo {articulo} no existe o no hay inventario suficiente" 
+                print(mensajes)  
         finally:
             print(self.inventarioMaestro)
+            socketCliente.send(mensajes.encode('utf-8'))
             self.mutex.release()
     
     def cliente(self,usuario,idEnvio, compras):

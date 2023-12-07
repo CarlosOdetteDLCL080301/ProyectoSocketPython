@@ -1,4 +1,5 @@
 import socket,json,time
+import pandas as pd
 
 class NodoSucursal:
     # Inicializa la sucursal con la dirección, puerto y nombre de la sucursal especificada
@@ -25,9 +26,6 @@ class NodoSucursal:
             # Switch para afectar la variable mensaje según la opción seleccionada
             if opcion == 1:
                 mensaje = "comprarArticulo"
-                articulo = str(input("Que producto te gustaría comprar? Respuesta = "))
-                cantArt = str(input(f"Cuantos piezas compraras de {articulo}? Respuesta = "))
-                usuarioCliente = str(input("Agrega tu usuario: "))
             elif opcion == 2:
                 mensaje = "agregarArticulo"
                 articulo = str(input("Agrega el nombre del articulo por ingresar: "))
@@ -48,6 +46,22 @@ class NodoSucursal:
                 self.enviarMensaje(mensaje)
                 
                 if mensaje == "comprarArticulo":
+                    time.sleep(0.1)
+                    # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
+                    respuesta = self.miSocket.recv(1024)
+                    # # Se decodifica la respuesta y se convierte a un diccionario
+                    respuesta = respuesta.decode('utf-8')
+                    respuesta = json.loads(respuesta)
+                    # # Se imprime el diccionario
+                    print(f" Producto Disponible ".center(100,"-"))
+                    print(respuesta)
+                    for indice, producto, in enumerate(respuesta[self.sucursal], start=1):
+                        if respuesta[self.sucursal][producto]>0:
+                            print(f"{indice}.- {producto}")
+                    articulo = str(input("Que producto te gustaría comprar? Respuesta = "))
+                    cantArt = str(input(f"Cuantos piezas compraras de {articulo}? Respuesta = "))
+                    usuarioCliente = str(input("Agrega tu usuario: "))
+                    
                     # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
                     # sucursal correspondiente
                     self.enviarMensaje(articulo)
@@ -59,6 +73,11 @@ class NodoSucursal:
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
                     time.sleep(0.1)
                     self.enviarMensaje(usuarioCliente)
+                    time.sleep(0.2)
+                    respuesta = self.miSocket.recv(1024)
+                    respuesta = respuesta.decode('utf-8')
+                    print(respuesta)
+                    time.sleep(0.1)
                 if mensaje == "agregarArticulo":
                     # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
                     # sucursal correspondiente
@@ -80,8 +99,9 @@ class NodoSucursal:
                     respuesta = json.loads(respuesta)
                     # # Se imprime el diccionario
                     print(" USUARIOS ".center(50,"-"))
-                    for unUsuario in respuesta:
-                        print(f"--> {unUsuario}")
+                    for indice, usuario in enumerate(respuesta,start=1):
+                        print(f"{indice}.- {usuario}")                     
+ 
                     # # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
                     # # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando
                     time.sleep(0.1) 
@@ -116,3 +136,6 @@ class NodoSucursal:
 
 nuevaSucursal = NodoSucursal("192.168.100.5", 5000, "sucursal_CDMX")
 nuevaSucursal.main()
+"""
+{'sucursal_CDMX': {'Fritos': 0, 'Cheetos': 0, 'Doritos': 0, 'Ruffles': 0, 'Tostitos': 0, 'Sabritas Adobadas': 0, 'Rancheritos': 0, 'Chocoretas': 0, 'Sabritas': 0}}
+"""
