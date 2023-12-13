@@ -1,4 +1,5 @@
 import socket, json, threading, random, time
+from sys import argv
 class NodoMaestro:
     def __init__(self, host, port):
         self.host = host
@@ -218,5 +219,5 @@ class NodoMaestro:
             print(self.inventarioMaestro)
             self.mutex.release()
 
-nodoMaestro = NodoMaestro("192.168.100.5", 5000)
+nodoMaestro = NodoMaestro(str(argv[1]), 5000)
 nodoMaestro.iniciarServidor()

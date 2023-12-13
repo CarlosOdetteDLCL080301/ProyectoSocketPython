@@ -1,5 +1,5 @@
 import socket,json,time
-
+from sys import argv
 class NodoSucursal:
     # Inicializa la sucursal con la dirección, puerto y nombre de la sucursal especificada
     def __init__(self, host, port, sucursal):
@@ -85,6 +85,7 @@ class NodoSucursal:
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
                     time.sleep(0.1)
                     self.enviarMensaje(cantArt)
+                    time.sleep(0.1)
                 if mensaje == "consultarCliente":
                     # Se recibirá un diccionario que nos enviará el nodo maestro
                     # Aqui recibiremos el diccionario
@@ -128,13 +129,13 @@ class NodoSucursal:
         mensajeCompleto = f"[{tiempoProcesado}] {mensaje}"
         
         # Envia el mensaje al Nodo Maestro como bytes codificados en UTF-8
+        time.sleep(0.1)
         self.miSocket.send(mensaje.encode('utf-8'))
+        time.sleep(0.1)
     def soyLasSucursal(self):
         # Envia el nombre de la sucursal al Nodo Maestro
+        time.sleep(0.1)
         self.miSocket.send(self.sucursal.encode('utf-8'))
-
-nuevaSucursal = NodoSucursal("192.168.100.5", 5000, "sucursal_CDMX")
+        time.sleep(0.1)
+nuevaSucursal = NodoSucursal(str(argv[1]), 5000, f"sucursal_{argv[2].upper()}")
 nuevaSucursal.main()
-"""
-{'sucursal_CDMX': {'Fritos': 0, 'Cheetos': 0, 'Doritos': 0, 'Ruffles': 0, 'Tostitos': 0, 'Sabritas Adobadas': 0, 'Rancheritos': 0, 'Chocoretas': 0, 'Sabritas': 0}}
-"""
