@@ -45,7 +45,7 @@ class NodoSucursal:
                 self.enviarMensaje(mensaje)
                 
                 if mensaje == "comprarArticulo":
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
                     respuesta = self.miSocket.recv(1024)
                     # # Se decodifica la respuesta y se convierte a un diccionario
@@ -66,32 +66,32 @@ class NodoSucursal:
                     self.enviarMensaje(articulo)
                     # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     self.enviarMensaje(cantArt)
                     # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     self.enviarMensaje(usuarioCliente)
                     time.sleep(0.2)
                     respuesta = self.miSocket.recv(1024)
                     respuesta = respuesta.decode('utf-8')
                     print(respuesta)
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                 if mensaje == "agregarArticulo":
                     # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
                     # sucursal correspondiente
                     self.enviarMensaje(articulo)
                     # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando 
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     self.enviarMensaje(cantArt)
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                 if mensaje == "consultarCliente":
                     # Se recibirá un diccionario que nos enviará el nodo maestro
                     # Aqui recibiremos el diccionario
                     # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
                     # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
                     respuesta = self.miSocket.recv(1024)
                     # # Se decodifica la respuesta y se convierte a un diccionario
@@ -104,9 +104,9 @@ class NodoSucursal:
  
                     # # Se agrega un pequeño sleep, ya que si no se agrega, el mensaje anterior y posterior a esta linea, se manda
                     # # concatenados, provocando que en el nodo maestro, no se reciba un mensaje, haciendo que se quede esperando
-                    time.sleep(0.1) 
+                    time.sleep(0.2) 
                     pass
-
+                
                 # Recibe una respuesta del Nodo Maestro (hasta 1024 bytes) y la decodifica
                 respuesta = self.miSocket.recv(1024)
                 print(respuesta.decode('utf-8'))
@@ -129,13 +129,13 @@ class NodoSucursal:
         mensajeCompleto = f"[{tiempoProcesado}] {mensaje}"
         
         # Envia el mensaje al Nodo Maestro como bytes codificados en UTF-8
-        time.sleep(0.1)
+        time.sleep(0.3)
         self.miSocket.send(mensaje.encode('utf-8'))
-        time.sleep(0.1)
+        time.sleep(0.3)
     def soyLasSucursal(self):
         # Envia el nombre de la sucursal al Nodo Maestro
-        time.sleep(0.1)
+        time.sleep(0.3)
         self.miSocket.send(self.sucursal.encode('utf-8'))
-        time.sleep(0.1)
+        time.sleep(0.3)
 nuevaSucursal = NodoSucursal(str(argv[1]), 5000, f"sucursal_{argv[2].upper()}")
 nuevaSucursal.main()
