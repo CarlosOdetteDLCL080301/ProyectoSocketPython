@@ -73,10 +73,6 @@ class NodoSucursal:
                     time.sleep(0.3)
                     self.enviarMensaje(usuarioCliente)
                     time.sleep(0.2)
-                    respuesta = self.miSocket.recv(1024)
-                    respuesta = respuesta.decode('utf-8')
-                    print(respuesta)
-                    time.sleep(0.3)
                 if mensaje == "agregarArticulo":
                     # Si se quiere comprar o agregar un artículo, recibe los datos del artículo y lo envía a la
                     # sucursal correspondiente

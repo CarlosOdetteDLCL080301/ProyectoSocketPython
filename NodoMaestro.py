@@ -200,12 +200,17 @@ class NodoMaestro:
         
     def consultarClientes(self, socketCliente):
         # Se envía el diccionario de clientes
+        time.sleep(0.3)
         socketCliente.send(json.dumps(self.clientesYSusGuiasDeEnvio).encode('utf-8'))
-
+        time.sleep(0.3)
     def agregarArticulo(self,socketCliente):
+        time.sleep(0.3)
         articulo = socketCliente.recv(1024)
+        time.sleep(0.3)
         articulo = articulo.decode('utf-8')
+        time.sleep(0.3)
         cantArt = socketCliente.recv(1024)
+        time.sleep(0.3)
         cantArt = int(cantArt.decode('utf-8'))
         print(" Se agrega al inventario lo siguiente ".center(100,"-"))
         print(f"Articulo: {articulo}\tCantidad: {cantArt}")
